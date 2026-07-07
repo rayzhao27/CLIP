@@ -1,0 +1,38 @@
+model:
+  backbone: openai/clip-vit-base-patch32
+  freeze_logit_scale: false
+  unfreeze_projection_heads: true
+  lora:
+    r: 16
+    lora_alpha: 32
+    lora_dropout: 0.1
+    target_modules: [q_proj, v_proj]
+    bias: none
+
+data:
+  dataset: flickr30k
+  root: data/flickr30k/flickr30k-images
+  ann_file: data/flickr30k/dataset_flickr30k.json
+  image_size: 224
+  batch_size: 256
+  num_workers: 4
+  max_text_length: 77
+
+training:
+  epochs: 20
+  lr: 1e-4
+  weight_decay: 0.01
+  warmup_steps: 200
+  grad_accumulation_steps: 1
+  mixed_precision: "no"   # use bf16/fp16 on CUDA; "no" on MPS/CPU
+  clip_grad_norm: 1.0
+  hard_neg_weight: 0.0
+  checkpoint_dir: checkpoints/flickr30k
+  log_interval: 50
+  eval_interval: 1
+  wandb_project: clip-lora
+  seed: 42
+
+eval:
+  top_k: [1, 5, 10]
+  batch_size: 512

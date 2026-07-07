@@ -63,7 +63,9 @@ class CLIPWithLoRA(nn.Module):
     def encode_image(
         self, pixel_values: torch.Tensor, normalize: bool = True
     ) -> torch.Tensor:
-        feats = self._clip.get_image_features(pixel_values=pixel_values)
+        clip = self._peft.base_model.model
+        vision_out = clip.vision_model(pixel_values=pixel_values)
+        feats = clip.visual_projection(vision_out.pooler_output)
         return F.normalize(feats, dim=-1) if normalize else feats
 
     def encode_text(
@@ -72,9 +74,9 @@ class CLIPWithLoRA(nn.Module):
         attention_mask: torch.Tensor,
         normalize: bool = True,
     ) -> torch.Tensor:
-        feats = self._clip.get_text_features(
-            input_ids=input_ids, attention_mask=attention_mask
-        )
+        clip = self._peft.base_model.model
+        text_out = clip.text_model(input_ids=input_ids, attention_mask=attention_mask)
+        feats = clip.text_projection(text_out.pooler_output)
         return F.normalize(feats, dim=-1) if normalize else feats
 
     def forward(

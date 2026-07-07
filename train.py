@@ -182,6 +182,8 @@ def main() -> None:
         num_workers=cfg.data.num_workers,
         pin_memory=True,
         drop_last=True,
+        persistent_workers=True,
+        prefetch_factor=4,
     )
     # Val loader is only used if you want a quick sanity loop;
     # eval uses val_ds.image_dataset / val_ds.text_dataset directly.
@@ -189,7 +191,9 @@ def main() -> None:
     # ------------------------------------------------------------------
     # Model + loss + optimizer + scheduler
     # ------------------------------------------------------------------
-    model = CLIPWithLoRA(cfg.model)
+    torch.backends.cudnn.benchmark = True
+
+    model = torch.compile(model)
 
     if accelerator.is_main_process:
         model.print_trainable_summary()

@@ -193,7 +193,7 @@ def main() -> None:
     # ------------------------------------------------------------------
     torch.backends.cudnn.benchmark = True
 
-    model = torch.compile(model)
+    model = CLIPWithLoRA(cfg.model)
 
     if accelerator.is_main_process:
         model.print_trainable_summary()
